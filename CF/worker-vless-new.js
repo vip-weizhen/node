@@ -537,7 +537,6 @@ function processVlessHeader(vlessBuffer, userID) {
 		isUDP,
 	};
 }
-return { hasError： false， addressRemote： addressValue， addressType， portRemote， rawDataIndex： addressValueIndex + addressLength， vlessVersion： version， isUDP， };}
 
 /**
  * Converts a remote socket to a WebSocket connection.
@@ -602,7 +601,6 @@ async function remoteSocketToWS(remoteSocket, webSocket, vlessResponseHeader, re
 			);
 			safeCloseWebSocket(webSocket);
 		});
- /** * 将远程套接字转换为 WebSocket 连接。* @param {import（“@cloudflare/workers-types”）.套接字} 远程套接字 要转换的远程套接字。* @param {import（“@cloudflare/workers-types”）.WebSocket} webSocket 要连接到的 WebSocket。* @param {ArrayBuffer | null} vlessResponseHeader VLESS 响应标头。* @param {（（） => 承诺） | null} 重试 在连接失败时重试连接的函数。 * @param {（信息： 字符串） => 无效} 日志 日志记录函数。 * @returns {承诺} 转换完成后解析的承诺。 */ 异步函数 remoteSocketToWS（remoteSocket， webSocket， vlessResponseHeader， retry， log） { // remote--> ws let remoteChunkCount = 0; let chunks = []; /** @type {ArrayBuffer | null} */ let vlessHeader = vlessResponseHeader; let hasIncomingData = false; // 检查 remoteSocket 是否有传入数据 await remoteSocket.readable .pipeTo（ new WritableStream（{ start（） { }， /** * * @param {Uint8Array} chunk * @param {*} controller */ async write（chunk， controller） { hasIncomingData = true; remoteChunkCount++; if （webSocket.readyState ！== WS_READY_STATE_OPEN） { controller.error（ 'webSocket.readyState is not open， may close' ）; } if （vlessHeader） { webSocket.send（await new Blob（[vlessHeader， chunk]）.arrayBuffer（））; vlessHeader = null; } else { console.log（'remoteSocketToWS send chunk ${chunk.byteLength}'）;似乎不需要速率限制，CF似乎可以解决这个问题??..if （remoteChunkCount > 20000） { // // cf one package is 4096 byte（4kb）， 4096 * 20000 = 80M // await delay（1）; // } webSocket.send（chunk）;} }， close（） { log（'remoteConnection！.可读性与hasIncomingData is ${hasIncomingData}'接近）;safeCloseWebSocket（webSocket）;不需要服务器关闭Websocket frist在某些情况下会导致HTTP ERR_CONTENT_LENGTH_MISMATCH问题，客户端无论如何都会发送关闭事件。}， abort（reason） { console.error（'remoteConnection！.可读中止“，原因）;}， }） ） .catch（（error） => { console.error（ 'remoteSocketToWS has exception '， error.堆栈 ||错误）;safeCloseWebSocket（webSocket）;});
 	// seems is cf connect socket have error,
 	// 1. Socket.closed will have error
 	// 2. Socket.readable will be close without any data coming
@@ -611,7 +609,6 @@ async function remoteSocketToWS(remoteSocket, webSocket, vlessResponseHeader, re
 		retry();
 	}
 }
-似乎是 cf 连接套接字有错误， // 1.Socket.closed 将出现错误 // 2。Socket.readable 将在没有任何数据进入的情况下关闭，如果 （hasIncomingData === false && retry） { log（'retry'） retry（）; } }
 /**
  * Decodes a base64 string into an ArrayBuffer.
  * @param {string} base64Str The base64 string to decode.
@@ -631,7 +628,6 @@ function base64ToArrayBuffer(base64Str) {
 		return { earlyData: null, error };
 	}
 }
-/** * 将 base64 字符串解码为 ArrayBuffer。* @param {string} base64Str 要解码的 base64 字符串。* @returns {{earlyData： ArrayBuffer|null， error： Error|null}} 包含解码的 ArrayBuffer 的对象，如果存在错误，则为 null，如果存在错误，则为 null，如果没有错误，则包含 null。*/ function base64ToArrayBuffer（base64Str） { if （！base64Str） { return { earlyData： null， error： null }; } try { // go use modified Base64 for URL rfc4648 其中 js atob 不支持 base64Str = base64Str.replace（/-/g， '+'）.replace（/_/g， '/'）; const decode = atob（base64Str）; const arryBuffer = Uint8Array.from（decode， （c） => c.charCodeAt（0））; return { earlyData： arryBuffer.buffer， error： null }; } catch （error） { return { earlyData： null， error }; } }
 /**
  * Checks if a given string is a valid UUID.
  * Note: This is not a real UUID validation.
@@ -664,7 +660,6 @@ for (let i = 0; i < 256; ++i) {
 function unsafeStringify(arr, offset = 0) {
 	return (byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + "-" + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + "-" + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + "-" + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + "-" + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] + byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]).toLowerCase();
 }
-函数 unsafeStringify（arr， offset = 0） { return （byteToHex[arr[offset + 0]] + byteToHex[arr[offset + 1]] + byteToHex[arr[offset + 2]] + byteToHex[arr[offset + 3]] + “-” + byteToHex[arr[offset + 4]] + byteToHex[arr[offset + 5]] + “-” + byteToHex[arr[offset + 6]] + byteToHex[arr[offset + 7]] + “-” + byteToHex[arr[offset + 8]] + byteToHex[arr[offset + 9]] + “-” + byteToHex[arr[offset + 10]] + byteToHex[arr[offset + 11]] + byteToHex[arr[offset + 12]] + byteToHex[arr[offset + 13]] +byteToHex[arr[offset + 14]] + byteToHex[arr[offset + 15]]）.toLowerCase（）;}
 function stringify(arr, offset = 0) {
 	const uuid = unsafeStringify(arr, offset);
 	if (!isValidUUID(uuid)) {
@@ -681,11 +676,9 @@ function stringify(arr, offset = 0) {
  * @returns {{write: (chunk: Uint8Array) => void}} An object with a write method that accepts a Uint8Array chunk to write to the transform stream.
  */
 async function handleUDPOutBound(webSocket, vlessResponseHeader, log) {
-/** * 通过将数据转换为 DNS 查询并通过 WebSocket 连接发送它们来处理出站 UDP 流量。* @param {import（“@cloudflare/workers-types”）.WebSocket} webSocket 用于发送 DNS 查询的 WebSocket 连接。* @param {ArrayBuffer} vlessResponseHeader VLESS 响应标头。* @param {（字符串） => void} log 日志记录函数。* @returns {{write： （chunk： Uint8Array） => void}} 具有 write 方法的对象，该方法接受 Uint8Array 块以写入转换流。*/ async function handleUDPOutBound（webSocket， vlessResponseHeader， log） {
 	let isVlessHeaderSent = false;
 	const transformStream = new TransformStream({
 		start(controller) {
-let isVlessHeaderSent = false;const transformStream = new TransformStream（{ start（controller） {
 		},
 		transform(chunk, controller) {
 			// udp message 2 byte is the the length of udp data
@@ -703,7 +696,6 @@ let isVlessHeaderSent = false;const transformStream = new TransformStream（{ st
 		flush(controller) {
 		}
 	});
-}， transform（chunk， controller） { // udp message 2 byte 是 udp 数据的长度 // TODO：这应该有错误，也许 udp chunk 可以在两个 websocket 消息中为 （let index = 0; 索引 < chunk.byteLength;）{ const lengthBuffer = chunk.slice（index， index + 2）; const udpPakcetLength = new DataView（lengthBuffer）.getUint16（0）; const udpData = new Uint8Array（ chunk.slice（index + 2， index + 2 + udpPakcetLength） ）; index = index + 2 + udpPakcetLength; controller.enqueue（udpData）; }}， flush（controller） { } }）;
 	// only handle dns udp for now
 	transformStream.readable.pipeTo(new WritableStream({
 		async write(chunk) {
@@ -732,9 +724,7 @@ let isVlessHeaderSent = false;const transformStream = new TransformStream（{ st
 	})).catch((error) => {
 		log('dns udp has error' + error)
 	});
-only handle dns udp for now transformStream.readable.pipeTo（new WritableStream（{ async write（chunk） { const resp = await fetch（dohURL， // dns server url { method： 'POST'， headers： { 'content-type'： 'application/dns-message'， }， body： chunk， }） const dnsQueryResult = await resp.arrayBuffer（）; const udpSize = dnsQueryResult.byteLength; // console.log（[...new Uint8Array（dnsQueryResult）].map（（x） => x.toString（16）））;const udpSizeBuffer = new Uint8Array（[（udpSize >> 8） & 0xff， udpSize & 0xff]）;if （webSocket.readyState === WS_READY_STATE_OPEN） { log（'doh success and dns message length is ${udpSize}'）; if （isVlessHeaderSent） { webSocket.send（await new Blob（[udpSizeBuffer， dnsQueryResult]）.arrayBuffer（））; } else { webSocket.send（await new Blob（[vlessResponseHeader， udpSizeBuffer， dnsQueryResult]）.arrayBuffer（））; isVlessHeaderSent = true; } } }}））.catch（（error） => { log（'dns udp has error' + error） }）;
 	const writer = transformStream.writable.getWriter();
-const writer = transformStream.writable.getWriter（）;
 	return {
 		/**
 		 * 
@@ -745,7 +735,6 @@ const writer = transformStream.writable.getWriter（）;
 		}
 	};
 }
-return { /** * * @param {Uint8Array} chunk */ write（chunk） { writer.write（chunk）; } };}
 /**
  *
  * @param {string} userID - single or comma separated userIDs
@@ -756,14 +745,11 @@ function getVLESSConfig(userIDs, hostName) {
 	const commonUrlPart = `:443?encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#${hostName}`;
 	const separator = "---------------------------------------------------------------";
 	const hashSeparator = "################################################################";
-/** * * @param {string} userID - 单个或逗号分隔的用户IDs * @param {string | null} hostName * @returns {string} */ function getVLESSConfig（userIDs， hostName） { const commonUrlPart = '：443？encryption=none&security=tls&sni=${hostName}&fp=randomized&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#${hostName}'; const separator = “---------------------------------------------------------------”; const hashSeparator = ”################################################################";
 	// Split the userIDs into an array
 	let userIDArray = userIDs.split(',');
-将用户 ID 拆分为一个数组，让 userIDArray = userIDs.split（'，'）;
 	// Prepare output array
 	let output = [];
 	let header = [];
-准备输出数组让输出 = [];let 标头 = [];
 	header.push(`\n<p align="center">
 	<img src="https://cloudflare-ipfs.com/ipfs/bafybeigd6i5aavwpr6wvnwuyayklq3omonggta4x2q7kpmgafj357nkcky" alt="图片描述" style="margin-bottom: -50px;">
 `);
@@ -773,10 +759,6 @@ function getVLESSConfig(userIDs, hostName) {
 	header.push(`\n<iframe src="https://ghbtns.com/github-btn.html?user=USERNAME&repo=REPOSITORY&type=star&count=true&size=large" frameborder="0" scrolling="0" width="170" height="30" title="GitHub"></iframe>\n\n`.replace(/USERNAME/g, "3Kmfi6HP").replace(/REPOSITORY/g, "EDtunnel"));
 	header.push(`<a href="//${hostName}/sub/${userIDArray[0]}" target="_blank">VLESS 节点订阅连接</a>\n<a href="https://subconverter.do.xn--b6gac.eu.org/sub?target=clash&url=https://${hostName}/sub/${userIDArray[0]}?format=clash&insert=false&emoji=true&list=false&tfo=false&scv=true&fdn=false&sort=false&new_name=true" target="_blank">Clash 节点订阅连接</a></p>\n`);
 	header.push(``);
- header.push(`\n
- 图片描述 `); header.push(`\nWelcome! This function generates configuration for VLESS protocol. If you found this useful, please check our GitHub project for more:\n`); header.push(`欢迎！ 这是生成 VLESS 协议的配置。 如果您发现这个项目很好用，请查看我们的 GitHub 项目给我一个start：\n`); header.push(`\nEDtunnel - https://github.com/3Kmfi6HP/EDtunnel\n`); header.push(`\n<iframe></iframe>\n\n`.replace(/USERNAME/g, "3Kmfi6HP").replace(/REPOSITORY/g, "EDtunnel")); header.push(`VLESS 节点订阅连接\nClash 节点订阅连接
-
-\n`); header.push(``);
 	// Generate output string for each userID
 	userIDArray.forEach((userID) => {
 		const vlessMain = `vless://${userID}@${hostName}${commonUrlPart}`;
@@ -786,7 +768,6 @@ function getVLESSConfig(userIDs, hostName) {
 		output.push(`${hashSeparator}\nv2ray with best ip\n${separator}\n${vlessSec}\n${separator}`);
 	});
 	output.push(`${hashSeparator}\n# Clash Proxy Provider 配置格式(configuration format)\nproxy-groups:\n  - name: UseProvider\n	type: select\n	use:\n	  - provider1\n	proxies:\n	  - Proxy\n	  - DIRECT\nproxy-providers:\n  provider1:\n	type: http\n	url: https://${hostName}/sub/${userIDArray[0]}?format=clash\n	interval: 3600\n	path: ./provider1.yaml\n	health-check:\n	  enable: true\n	  interval: 600\n	  # lazy: true\n	  url: http://www.gstatic.com/generate_204\n\n${hashSeparator}`);
-为每个用户生成输出字符串ID userIDArray.forEach（（userID） => { const vlessMain = 'vless://${userID}@${hostName}${commonUrlPart}'; const vlessSec = 'vless://${userID}@${proxyIP}${commonUrlPart}'; output.push（'UUID： ${userID}'）; output.push（'${hashSeparator}\nv2ray default ip\n${separator}\n${vlessMain}\n${separator}'）; output.push（'${hashSeparator}\nv2ray with best ip\n${separator}\n${separator}\n${vlessSec}\n${separator}'）; }）;output.push（'${hashSeparator}\n# 冲突代理提供程序 配置格式（配置格式）\n代理组：\n - 名称： 使用提供程序\n 类型： 选择\n 使用：\n - 提供程序1\n 代理：\n - 代理\n - 直接\n代理提供程序：\n 提供程序1：\n 类型： http\n url： https://${hostName}/sub/${userIDArray[0]}？format=clash\n 间隔： 3600\n 路径： ./provider1.yaml\n 运行状况检查：\n 启用： true\n 间隔： 600\n # lazy： true\n url： http://www.gstatic.com/generate_204\n\n${hashSeparator}'）;
 	// HTML Head with CSS
 	const htmlHead = `
     <head>
@@ -807,7 +788,6 @@ function getVLESSConfig(userIDs, hostName) {
         <meta name="twitter:image" content="https://cloudflare-ipfs.com/ipfs/bafybeigd6i5aavwpr6wvnwuyayklq3omonggta4x2q7kpmgafj357nkcky" />
         <meta property="og:image:width" content="1500" />
         <meta property="og:image:height" content="1500" />
-HTML Head with CSS const htmlHead = ' EDtunnel： VLESS 配置  这是一个用于生成 VLESS 协议配置的工具。 如果你觉得有用，请在 GitHub 上给我们一个星 https://github.com/3Kmfi6HP/EDtunnel！”> EDtunnel， cloudflare pages， cloudflare worker， severless”>           
         <style>
         body {
             font-family: Arial, sans-serif;
@@ -815,7 +795,6 @@ HTML Head with CSS const htmlHead = ' EDtunnel： VLESS 配置  这是一个用�
             color: #333;
             padding: 10px;
         }
-
         a {
             color: #1a0dab;
             text-decoration: none;
@@ -839,11 +818,9 @@ HTML Head with CSS const htmlHead = ' EDtunnel： VLESS 配置  这是一个用�
                 background-color: #333;
                 color: #f0f0f0;
             }
-a { 颜色： #1a0dab; 文本装饰： 无; } img { 最大宽度： 100%; 高度： 自动; } pre { 空白： 预换行; 自动换行： 断字; 背景颜色： #fff; 边框： 1px 纯色 #ddd; 填充： 15px; 边距： 10px 0; } /* 深色模式 */ @media （首选配色方案： 深色） { 正文 { 背景颜色： #333; 颜色： #f0f0f0; }
             a {
                 color: #9db4ff;
             }
-a { 颜色： #9db4ff; }
             pre {
                 background-color: #282a36;
                 border-color: #6272a4;
@@ -864,20 +841,14 @@ a { 颜色： #9db4ff; }
     </body>
 </html>`;
 }
-用换行符连接输出，换行并返回 ' ${htmlHead} 
-${header.join（''）}${output.join（'\n'）} '  ; } 
-  
 
 function createVLESSSub(userID_Path, hostName) {
 	let portArray_http = [80, 8080, 8880, 2052, 2086, 2095];
 	let portArray_https = [443, 8443, 2053, 2096, 2087, 2083];
-function createVLESSSub（userID_Path， hostName） { let portArray_http = [80， 8080， 8880， 2052， 2086， 2095]; let portArray_https = [443， 8443， 2053， 2096， 2087， 2083];
 	// Split the userIDs into an array
 	let userIDArray = userID_Path.includes(',') ? userID_Path.split(',') : [userID_Path];
-将用户 ID 拆分为一个数组，让 userIDArray = userID_Path.include（'，'） ？userID_Path.split（'，'） ： [userID_Path];
 	// Prepare output array
 	let output = [];
-准备输出数组让输出 = [];
 	// Generate output string for each userID
 	userIDArray.forEach((userID) => {
 		// Check if the hostName is a Cloudflare Pages domain, if not, generate HTTP configurations
@@ -887,7 +858,6 @@ function createVLESSSub（userID_Path， hostName） { let portArray_http = [80�
 			portArray_http.forEach((port) => {
 				const commonUrlPart_http = `:${port}?encryption=none&security=none&fp=random&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#${hostName}-HTTP`;
 				const vlessMainHttp = `vless://${userID}@${hostName}${commonUrlPart_http}`;
-为每个用户生成输出字符串ID userIDArray.forEach（（userID） => { // 检查主机名是否是 Cloudflare Pages 域，如果不是，则生成 HTTP 配置 // 原因： pages.dev 不支持 http 仅 https if （！hostName.include（'pages.dev'）） { // Tryrate over all ports for http portArray_http.forEach（（port） => { const commonUrlPart_http = '：${port}？encryption=none&security=none&fp=random&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#${hostName}-HTTP'; const vlessMainHttp ='vless://${userID}@${hostName}${commonUrlPart_http}';
 				// For each proxy IP, generate a VLESS configuration and add to output
 				proxyIPs.forEach((proxyIP) => {
 					const vlessSecHttp = `vless://${userID}@${proxyIP}${commonUrlPart_http}-${proxyIP}-EDtunnel`;
@@ -900,7 +870,6 @@ function createVLESSSub（userID_Path， hostName） { let portArray_http = [80�
 		portArray_https.forEach((port) => {
 			const commonUrlPart_https = `:${port}?encryption=none&security=tls&sni=${hostName}&fp=random&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#${hostName}-HTTPS`;
 			const vlessMainHttps = `vless://${userID}@${hostName}${commonUrlPart_https}`;
-对于每个代理 IP，生成一个 VLESS 配置并添加到输出 proxyIPs.forEach（（proxyIP） => { const vlessSecHttp = 'vless://${userID}@${proxyIP}${commonUrlPart_http}-${proxyIP}-EDtunnel'; output.push（'${vlessMainHttp}'）; output.push（'${vlessSecHttp}'）; }）;});} // Tryrate over all ports for https portArray_https.forEach（（port） => { const commonUrlPart_https = '：${port}？encryption=none&security=tls&sni=${hostName}&fp=random&type=ws&host=${hostName}&path=%2F%3Fed%3D2048#${hostName}-HTTPS'; const vlessMainHttps = 'vless://${userID}@${hostName}${commonUrlPart_https}';
 			// For each proxy IP, generate a VLESS configuration and add to output
 			proxyIPs.forEach((proxyIP) => {
 				const vlessSecHttps = `vless://${userID}@${proxyIP}${commonUrlPart_https}-${proxyIP}-EDtunnel`;
@@ -909,8 +878,6 @@ function createVLESSSub（userID_Path， hostName） { let portArray_http = [80�
 			});
 		});
 	});
-对于每个代理 IP，生成一个 VLESS 配置并添加到输出 proxyIPs.forEach（（proxyIP） => { const vlessSecHttps = 'vless://${userID}@${proxyIP}${commonUrlPart_https}-${proxyIP}-EDtunnel'; output.push（'${vlessMainHttps}'）; output.push（'${vlessSecHttps}'）; }）;});});
 	// Join output with newlines
 	return output.join('\n');
 }
-使用换行符连接输出返回输出.join（'\n'）;}
