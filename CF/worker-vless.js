@@ -3,7 +3,7 @@
 import { connect } from 'cloudflare:sockets';
 // How to generate your own UUID:
 // [Windows] Press "Win + R", input cmd and run:  Powershell -NoExit -Command "[guid]::NewGuid()"
-let userID = 'd342d11e-d424-4583-b36e-524ab1f0afa4';
+let userID = '866961d9-a863-4202-99ce-2f4e54d35e61';
 let proxyIP = 'cdn.anycast.eu.org';
 
 if (!isValidUUID(userID)) {
@@ -224,7 +224,6 @@ function makeReadableWebSocketStream(webSocketServer, earlyDataHeader, log) {
 				controller.enqueue(earlyData);
 			}
 		},
-该事件表示客户端关闭了客户端 -> 服务器流。但是，服务器 -> 客户端流仍然打开，直到您在服务器端调用 close（）。WebSocket协议规定，必须在每个方向上发送单独的关闭消息才能完全关闭套接字。webSocketServer.addEventListener（'close'， （） => { // client send close， need close server // if stream is cancel， skip controller.close safeCloseWebSocket（webSocketServer）; if （readableStreamCancel） { return; } controller.close（）; } ）;webSocketServer.addEventListener（'error'， （err） => { log（'webSocketServer has error'）; controller.error（err）; } ）;for ws 0rtt const { earlyData， error } = base64ToArrayBuffer（earlyDataHeader）;if （error） { controller.error（error）; } else if （earlyData） { controller.enqueue（earlyData）; } }，
 		pull(controller) {
 			// if ws can stop read if stream is full, we can implement backpressure
 			// https://streams.spec.whatwg.org/#example-rs-push-backpressure
@@ -241,7 +240,6 @@ function makeReadableWebSocketStream(webSocketServer, earlyDataHeader, log) {
 			safeCloseWebSocket(webSocketServer);
 		}
 	});
-pull（controller） { // 如果 ws 可以在流已满的情况下停止读取，我们可以实现背压 // https://streams.spec.whatwg.org/#example-rs-push-backpressure }，取消（原因） { // 1. 管道 WritableStream 有错误，这个取消将被调用，所以 ws 句柄服务器关闭到这里 // 2. 如果 readableStream 被取消，所有 controller.close/enqueue 都需要跳过， // 3. 但从测试控制器错误仍然有效，即使可读流被取消如果 （readableStreamCancel） { return; } log（'ReadableStream was取消，由于 ${原因}'） 可读流取消 = 真;safeCloseWebSocket（webSocketServer）;} });
 	return stream;
 }
 // https://xtls.github.io/development/protocols/vless.html
@@ -274,7 +272,6 @@ function processVlessHeader(
 			message: 'invalid user',
 		};
 	}
-/** * * @param { ArrayBuffer} vlessBuffer * @param {string} userID * @returns */ function processVlessHeader（ vlessBuffer， userID ） { if （vlessBuffer.byteLength < 24） { return { hasError： true， message： 'invalid data'， }; } const version = new Uint8Array（vlessBuffer.slice（0， 1））; let isValidUser = false; let isUDP = false; if （stringify（new Uint8Array（vlessBuffer.slice（1， 17））） === userID） { isValidUser = true; } if （！isValidUser） { return { hasError： true， message： 'invalid user'， }; }
 	const optLength = new Uint8Array(vlessBuffer.slice(17, 18))[0];
 	//skip opt for now
 	const command = new Uint8Array(
@@ -296,7 +293,6 @@ function processVlessHeader(
 	const portBuffer = vlessBuffer.slice(portIndex, portIndex + 2);
 	// port is big-Endian in raw data etc 80 == 0x005d
 	const portRemote = new DataView(portBuffer).getUint16(0);
-0x01 TCP // 0x02 UDP // 0x03 MUX if （command === 1） { } else if （command === 2） { isUDP = true; } else { return { hasError： true， message： 'command ${command} is not support， command 01-tcp，02-udp，03-mux'， }; } const portIndex = 18 + optLength + 1;const portBuffer = vlessBuffer.slice（portIndex， portIndex + 2）;port 在原始数据等中是大端序 80 == 0x005d const portRemote = new DataView（portBuffer）.getUint16（0）;
 	let addressIndex = portIndex + 2;
 	const addressBuffer = new Uint8Array(
 		vlessBuffer.slice(addressIndex, addressIndex + 1)
@@ -421,7 +417,6 @@ async function remoteSocketToWS(remoteSocket, webSocket, vlessResponseHeader, re
 			);
 			safeCloseWebSocket(webSocket);
 		});
-/** * * @param {import（“@cloudflare/workers-types”）.Socket} remoteSocket * @param {import（“@cloudflare/workers-types”）.WebSocket} webSocket * @param {ArrayBuffer} vlessResponseHeader * @param {（） => Promise） | null} retry * @param {*} log */ async function remoteSocketToWS（remoteSocket， webSocket， vlessResponseHeader， retry， log） { // remote--> ws let remoteChunkCount = 0; let chunks = []; /** @type {ArrayBuffer | null} */ let vlessHeader = vlessResponseHeader; let hasIncomingData = false; // 检查 remoteSocket 是否有传入数据等待 remoteSocket.readable .pipeTo（ new WritableStream（{ start（） { }， /** * * @param {Uint8Array} chunk * @param {*} controller */ async write（chunk， controller） { hasIncomingData = true; // remoteChunkCount++; if （webSocket.readyState ！== WS_READY_STATE_OPEN） { controller.error（ 'webSocket.readyState is not open， may close' ）; } if （vlessHeader） { webSocket.send（await new Blob（[vlessHeader， chunk]）.arrayBuffer（））; vlessHeader = null; } else { // 似乎不需要速率限制，CF 似乎可以解决这个问题??.. // if （remoteChunkCount > 20000） { // // cf 一个包是 4096字节（4KB）， 4096 * 20000 = 80M // 等待延迟（1）;} webSocket.send（chunk）;} }， close（） { log（'remoteConnection！.可读性与hasIncomingData is ${hasIncomingData}'接近）;safeCloseWebSocket（webSocket）;不需要服务器关闭Websocket frist在某些情况下会导致HTTP ERR_CONTENT_LENGTH_MISMATCH问题，客户端无论如何都会发送关闭事件。}， abort（reason） { console.error（'remoteConnection！.可读中止“，原因）;}， }） ） .catch（（error） => { console.error（ 'remoteSocketToWS has exception '， error.stack || error ）; safeCloseWebSocket（webSocket）; }）;
 	// seems is cf connect socket have error,
 	// 1. Socket.closed will have error
 	// 2. Socket.readable will be close without any data coming
@@ -449,7 +444,6 @@ function base64ToArrayBuffer(base64Str) {
 		return { error };
 	}
 }
-/** * * @param {string} base64Str * @returns */ function base64ToArrayBuffer（base64Str） { if （！base64Str） { return { error： null }; } try { // go use modified Base64 for URL rfc4648 其中 js atob 不支持 base64Str = base64Str.replace（/-/g， '+'）.replace（/_/g， '/'）; const decode = atob（base64Str）; const arryBuffer = Uint8Array.from（decode， （c） => c.charCodeAt（0））; return { earlyData： arryBuffer.buffer， error： null }; } catch （error） { return { error }; } }
 /**
  * This is not real UUID validation
  * @param {string} uuid 
@@ -458,7 +452,6 @@ function isValidUUID(uuid) {
 	const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 	return uuidRegex.test(uuid);
 }
-/** * 这不是真正的 UUID 验证 * @param {string} uuid */ function isValidUUID（uuid） { const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[4][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i; return uuidRegex.test（uuid）; }
 const WS_READY_STATE_OPEN = 1;
 const WS_READY_STATE_CLOSING = 2;
 /**
@@ -496,7 +489,6 @@ function stringify(arr, offset = 0) {
  * @param {(string)=> void} log 
  */
 async function handleUDPOutBound(webSocket, vlessResponseHeader, log) {
-/** * * @param {import（“@cloudflare/workers-types”）.WebSocket} webSocket * @param {ArrayBuffer} vlessResponseHeader * @param {（string）=> void} log */ async function handleUDPOutBound（webSocket， vlessResponseHeader， log） {
 	let isVlessHeaderSent = false;
 	const transformStream = new TransformStream({
 		start(controller) {
@@ -537,7 +529,7 @@ async function handleUDPOutBound(webSocket, vlessResponseHeader, log) {
 				if (isVlessHeaderSent) {
 					webSocket.send(await new Blob([udpSizeBuffer, dnsQueryResult]).arrayBuffer());
 				} else {
-					webSocket.send(await new Blob([vlessResponseHeader, udpSizeBuffer, dnsQueryResult]).arrayBuffer());
+					webSocket.send(await new Blob([vlessResponseHeader, udpSizeBuffer, dnsQueryResult]).arrayBuffer()); 
 					isVlessHeaderSent = true;
 				}
 			}
@@ -545,7 +537,6 @@ async function handleUDPOutBound(webSocket, vlessResponseHeader, log) {
 	})).catch((error) => {
 		log('dns udp has error' + error)
 	});
-only handle dns udp for now transformStream.readable.pipeTo（new WritableStream（{ async write（chunk） { const resp = await fetch（'https：//1.1.1.1/dns-query'， { method： 'POST'， headers： { 'content-type'： 'application/dns-message'， }， body： chunk， }） const dnsQueryResult = await resp.arrayBuffer（）; const udpSize = dnsQueryResult.byteLength; // console.log（[...new Uint8Array（dnsQueryResult）].map（（x） => x.toString（16）））;const udpSizeBuffer = new Uint8Array（[（udpSize >> 8） & 0xff， udpSize & 0xff]）;if （webSocket.readyState === WS_READY_STATE_OPEN） { log（'doh success and dns message length is ${udpSize}'）; if （isVlessHeaderSent） { webSocket.send（await new Blob（[udpSizeBuffer， dnsQueryResult]）.arrayBuffer（））; } else { webSocket.send（await new Blob（[vlessResponseHeader， udpSizeBuffer， dnsQueryResult]）.arrayBuffer（））; isVlessHeaderSent = true; } } }}））.catch（（error） => { log（'dns udp has error' + error） }）;
 	const writer = transformStream.writable.getWriter();
 	return {
 		/**
